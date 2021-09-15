@@ -52,7 +52,7 @@ public class NetworkedClient : MonoBehaviour
                     break;
                 case NetworkEventType.DataEvent:
                     string msg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
-                    ProcessRecievedMsg(msg, recConnectionID);
+                    ProcessReceivedMsg(msg, recConnectionID);
                     //Debug.Log("got msg = " + msg);
                     break;
                 case NetworkEventType.DisconnectEvent:
@@ -79,7 +79,7 @@ public class NetworkedClient : MonoBehaviour
             hostID = NetworkTransport.AddHost(topology, 0);
             Debug.Log("Socket open.  Host ID = " + hostID);
 
-            connectionID = NetworkTransport.Connect(hostID, "192.168.2.37", socketPort, 0, out error); // server is local on network
+            connectionID = NetworkTransport.Connect(hostID, "192.168.1.41", socketPort, 0, out error); // server is local on network
 
             if (error == 0)
             {
@@ -102,15 +102,13 @@ public class NetworkedClient : MonoBehaviour
         NetworkTransport.Send(hostID, connectionID, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
     }
 
-    private void ProcessRecievedMsg(string msg, int id)
+    private void ProcessReceivedMsg(string msg, int id)
     {
-        Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
+        Debug.Log("msg received = " + msg + ".  connection id = " + id);
     }
 
     public bool IsConnected()
     {
         return isConnected;
     }
-
-
 }
