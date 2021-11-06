@@ -17,15 +17,18 @@ public class NetworkedClient : MonoBehaviour
     int ourClientID;
     string ip_address_ = "192.168.1.128"; //CHECK IF IP IS CORRECT FIRST AND FOREMOST
 
+    GameManager game_manager_;
+
     void Start()
     {
+        game_manager_ = FindObjectOfType<GameManager>();
         Connect();
     }
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.S))
-            SendMessageToHost("Hello from client");
+        //if(Input.GetKeyDown(KeyCode.S))
+        //    SendMessageToHost("Hello from client");
 
         UpdateNetworkConnection();
     }
@@ -104,6 +107,36 @@ public class NetworkedClient : MonoBehaviour
     private void ProcessReceivedMsg(string msg, int id)
     {
         Debug.Log("msg received = " + msg + ".  connection id = " + id);
+        string[] csv = msg.Split(',');
+        NetworkEnum.ServerToClientSignifier signifier = (NetworkEnum.ServerToClientSignifier)System.Enum.Parse(typeof(NetworkEnum.ServerToClientSignifier), csv[0]);
+        switch (signifier)
+        {
+            case NetworkEnum.ServerToClientSignifier.LoginComplete:
+                Debug.Log(">>> Login done!");
+                game_manager_.ChangeState(GameEnum.State.MainMenu);
+                break;
+            case NetworkEnum.ServerToClientSignifier.LoginFailed:
+                Debug.Log(">>> Login FAILED!");
+                //game_manager_.ChangeState(GameEnum.State.LoginMenu);
+                break;
+            case NetworkEnum.ServerToClientSignifier.AccountCreationComplete:
+                Debug.Log(">>> Creating Account done!");
+                game_manager_.ChangeState(GameEnum.State.MainMenu);
+                break;
+            case NetworkEnum.ServerToClientSignifier.AccountCreationFailed:
+                Debug.Log(">>> Creating Account FAILED!");
+                //game_manager_.ChangeState(GameEnum.State.LoginMenu);
+                break;
+            case NetworkEnum.ServerToClientSignifier.GameStart:
+                Debug.Log(">>> GameStart!");
+                game_manager_.ChangeState(GameEnum.State.TicTacToe);
+                break;
+            case NetworkEnum.ServerToClientSignifier.OpponentPlay:
+                Debug.Log(">>> Opponent played!");
+                break;
+            default:
+                break;
+        }
     }
 
     public bool IsConnected()
@@ -112,12 +145,14 @@ public class NetworkedClient : MonoBehaviour
     }
 }
 
-public static class GlobalEnum
+public static class NetworkEnum
 {
     public enum ClientToServerSignifier
     {
         CreateAccount = 1,
-        Login
+        Login,
+        JoinQueueForGameRoom,
+        TTTPlay
     }
 
     public enum ServerToClientSignifier
@@ -125,6 +160,8 @@ public static class GlobalEnum
         LoginComplete = 1,
         LoginFailed,
         AccountCreationComplete,
-        AccountCreationFailed
+        AccountCreationFailed,
+        OpponentPlay,
+        GameStart
     }
 }
