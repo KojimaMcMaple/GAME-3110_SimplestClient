@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     InputField username_input_, password_input_;
     Toggle create_toggle_, login_toggle_;
     NetworkedClient networked_client_;
+    //LinkedList<Button>
 
     //static GameObject instance;
     void Awake()
@@ -110,7 +111,7 @@ public class GameManager : MonoBehaviour
         password_input_.gameObject.SetActive(false);
         create_toggle_.gameObject.SetActive(false);
         login_toggle_.gameObject.SetActive(false);
-        tttsquare_button_.gameObject.SetActive(false);
+        //tttsquare_button_.gameObject.SetActive(false);
         switch (state)
         {
             case GameEnum.State.LoginMenu:
