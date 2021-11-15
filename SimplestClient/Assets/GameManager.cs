@@ -5,11 +5,20 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    Button submit_button_, join_gameroom_button_, tttsquare_button_;
+    Button submit_button_, join_gameroom_button_;
     InputField username_input_, password_input_;
     Toggle create_toggle_, login_toggle_;
     NetworkedClient networked_client_;
-    //LinkedList<Button>
+
+    // MAIN GAME VARS
+    Button tttsquare_button_; //temp
+    Vector2Int grid_size_ = new Vector2Int(3, 3); //(x,y) (col,row)
+    TicTacToeButtonController[,] button_list_;
+    private string play_token_ = "X";
+    private int player_id_ = 1;
+    int move_count_ = 0;
+    GameObject game_over_panel_;
+    Text game_over_text_;
 
     //static GameObject instance;
     void Awake()
@@ -32,9 +41,6 @@ public class GameManager : MonoBehaviour
                 case "JoinGameRoomButton":
                     join_gameroom_button_ = item.GetComponent<Button>();
                     break;
-                case "TTTSquareButton":
-                    tttsquare_button_ = item.GetComponent<Button>();
-                    break;
                 case "LoginToggle":
                     login_toggle_ = item.GetComponent<Toggle>();
                     break;
@@ -43,6 +49,31 @@ public class GameManager : MonoBehaviour
                     break;
                 case "NetworkedClient":
                     networked_client_ = item.GetComponent<NetworkedClient>();
+                    break;
+                case "TTTSquareButton":
+                    tttsquare_button_ = item.GetComponent<Button>();
+                    break;
+                case "BoardPanel":
+                    List<TicTacToeButtonController> children = new List<TicTacToeButtonController>();
+                    foreach (Transform child in item.transform)
+                    {
+                        children.Add(child.GetComponent<TicTacToeButtonController>());
+                    }
+                    button_list_ = new TicTacToeButtonController[grid_size_.x, grid_size_.y];
+                    for (int j = 0; j < grid_size_.y; j++)
+                    {
+                        for (int i = 0; i < grid_size_.x; i++)
+                        {
+                            button_list_[i, j] = children[j * grid_size_.x + i];
+                            button_list_[i, j].SetGridCoord(i, j);
+                        }
+                    }
+                    break;
+                case "GameOverPanel":
+                    game_over_panel_ = item;
+                    break;
+                case "WinText":
+                    game_over_text_ = item.GetComponent<Text>();
                     break;
                 default:
                     break;
@@ -112,6 +143,7 @@ public class GameManager : MonoBehaviour
         create_toggle_.gameObject.SetActive(false);
         login_toggle_.gameObject.SetActive(false);
         //tttsquare_button_.gameObject.SetActive(false);
+        game_over_panel_.SetActive(false);
         switch (state)
         {
             case GameEnum.State.LoginMenu:
@@ -130,8 +162,118 @@ public class GameManager : MonoBehaviour
             case GameEnum.State.TicTacToe:
                 tttsquare_button_.gameObject.SetActive(true);
                 break;
+            case GameEnum.State.TicTacToeWin:
+                GameOver();
+                game_over_panel_.SetActive(true);
+                game_over_text_.text = play_token_ + " Wins!";
+                break;
+            case GameEnum.State.TicTacToeDraw:
+                GameOver();
+                game_over_panel_.SetActive(true);
+                game_over_text_.text = "It's a draw!";
+                break;
             default:
                 break;
+        }
+    }
+
+    public string GetPlayToken()
+    {
+        return play_token_;
+    }
+
+    public int GetCurrPlayerId()
+    {
+        return player_id_;
+    }
+
+    public void CheckGridCoord(Vector2Int coord)
+    {
+        move_count_++;
+        // CHECK WITH OTHER COLS
+        for (int i = 0; i < grid_size_.x; i++)
+        {
+            if (button_list_[coord.x,i].GetState() != (GameEnum.TicTacToeButtonState)player_id_)
+                break;
+            if (i == grid_size_.x - 1)
+            {
+                //report win for player_id_
+                ChangeState(GameEnum.State.TicTacToeWin);
+            }
+        }
+
+        // CHECK WITH OTHER ROWS
+        for (int i = 0; i < grid_size_.x; i++)
+        {
+            if (button_list_[i, coord.y].GetState() != (GameEnum.TicTacToeButtonState)player_id_)
+                break;
+            if (i == grid_size_.x - 1)
+            {
+                //report win for player_id_
+                ChangeState(GameEnum.State.TicTacToeWin);
+            }
+        }
+
+        // CHECK DIAGONALLY
+        if (coord.x == coord.y)
+        {
+            for (int i = 0; i < grid_size_.x; i++)
+            {
+                if (button_list_[i, i].GetState() != (GameEnum.TicTacToeButtonState)player_id_)
+                    break;
+                if (i == grid_size_.x - 1)
+                {
+                    //report win for player_id_
+                    ChangeState(GameEnum.State.TicTacToeWin);
+                }
+            }
+        }
+
+        // CHECK REVERSE DIAGONALLY
+        if (coord.x + coord.y == grid_size_.x - 1)
+        {
+            for (int i = 0; i < grid_size_.x; i++)
+            {
+                if (button_list_[i,(grid_size_.x - 1) - i].GetState() != (GameEnum.TicTacToeButtonState)player_id_)
+                    break;
+                if (i == grid_size_.x - 1)
+                {
+                    //report win for player_id_
+                    ChangeState(GameEnum.State.TicTacToeWin);
+                }
+            }
+        }
+
+        // CHECK IF IS TIE
+        if (move_count_ == (Mathf.Pow(grid_size_.x, 2) - 1))
+        {
+            ChangeState(GameEnum.State.TicTacToeDraw);
+        }
+        ChangeSides();
+    }
+
+    void ChangeSides()
+    {
+        if (player_id_ == 1)
+        {
+            player_id_ = 2;
+            play_token_ = "O";
+        }
+        else if (player_id_ == 2)
+        {
+            player_id_ = 1;
+            play_token_ = "X";
+        }
+    }
+
+    void GameOver()
+    {
+        for (int j = 0; j < grid_size_.y; j++)
+        {
+            for (int i = 0; i < grid_size_.x; i++)
+            {
+                button_list_[i, j].GetComponent<Button>().interactable = false;
+            }
         }
     }
 }
@@ -143,6 +285,15 @@ public static class GameEnum
         LoginMenu = 1,
         MainMenu,
         WaitingInQueueForOtherPlayer,
-        TicTacToe
+        TicTacToe,
+        TicTacToeWin,
+        TicTacToeDraw,
+    }
+
+    public enum TicTacToeButtonState
+    {
+        kBlank,
+        kPlayer1,
+        kPlayer2
     }
 }
