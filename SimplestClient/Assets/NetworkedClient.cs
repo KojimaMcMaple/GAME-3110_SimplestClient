@@ -131,6 +131,14 @@ public class NetworkedClient : MonoBehaviour
                 Debug.Log(">>> GameStart!");
                 game_manager_.ChangeState(GameEnum.State.TicTacToe);
                 break;
+            case NetworkEnum.ServerToClientSignifier.GameDoTurn:
+                Debug.Log(">>> GameDoTurn!");
+                game_manager_.SetTurn(true);
+                break;
+            case NetworkEnum.ServerToClientSignifier.GameWaitForTurn:
+                Debug.Log(">>> GameWaitForTurn!");
+                game_manager_.SetTurn(false);
+                break;
             case NetworkEnum.ServerToClientSignifier.OpponentPlay:
                 Debug.Log(">>> Opponent played!");
                 break;
@@ -152,6 +160,7 @@ public static class NetworkEnum
         CreateAccount = 1,
         Login,
         JoinQueueForGameRoom,
+        GameWaitForFirstTurn,
         TTTPlay
     }
 
@@ -161,7 +170,12 @@ public static class NetworkEnum
         LoginFailed,
         AccountCreationComplete,
         AccountCreationFailed,
+        GameStart,
+        GameDoTurn,
+        GameWaitForTurn,
         OpponentPlay,
-        GameStart
+        GameDraw,
+        GameCurrPlayerWin,
+        GameOtherPlayerWin
     }
 }

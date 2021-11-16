@@ -17,8 +17,9 @@ public class GameManager : MonoBehaviour
     private string play_token_ = "X";
     private int player_id_ = 1;
     int move_count_ = 0;
-    GameObject game_over_panel_;
+    GameObject game_panel_, game_over_panel_;
     Text game_over_text_;
+    bool is_turn_ = false;
 
     //static GameObject instance;
     void Awake()
@@ -68,6 +69,9 @@ public class GameManager : MonoBehaviour
                             button_list_[i, j].SetGridCoord(i, j);
                         }
                     }
+                    break;
+                case "GamePanel":
+                    game_panel_ = item;
                     break;
                 case "GameOverPanel":
                     game_over_panel_ = item;
@@ -143,6 +147,7 @@ public class GameManager : MonoBehaviour
         create_toggle_.gameObject.SetActive(false);
         login_toggle_.gameObject.SetActive(false);
         //tttsquare_button_.gameObject.SetActive(false);
+        game_panel_.SetActive(false);
         game_over_panel_.SetActive(false);
         switch (state)
         {
@@ -160,7 +165,8 @@ public class GameManager : MonoBehaviour
                 
                 break;
             case GameEnum.State.TicTacToe:
-                tttsquare_button_.gameObject.SetActive(true);
+                //tttsquare_button_.gameObject.SetActive(true);
+                game_panel_.SetActive(true);
                 break;
             case GameEnum.State.TicTacToeWin:
                 GameOver();
@@ -187,7 +193,17 @@ public class GameManager : MonoBehaviour
         return player_id_;
     }
 
-    public void CheckGridCoord(Vector2Int coord)
+    public bool IsTurn()
+    {
+        return is_turn_;
+    }
+
+    public void SetTurn(bool value)
+    {
+        is_turn_ = value;
+    }
+
+    public void CheckGridCoord(Vector2Int coord) //[OM]
     {
         move_count_++;
         // CHECK WITH OTHER COLS
@@ -252,7 +268,7 @@ public class GameManager : MonoBehaviour
         ChangeSides();
     }
 
-    void ChangeSides()
+    void ChangeSides() //[OM]
     {
         if (player_id_ == 1)
         {
@@ -276,6 +292,11 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    void RestartGame()
+    {
+
+    }
 }
 
 public static class GameEnum
@@ -286,6 +307,7 @@ public static class GameEnum
         MainMenu,
         WaitingInQueueForOtherPlayer,
         TicTacToe,
+        TicTacToeNextPlayer,
         TicTacToeWin,
         TicTacToeDraw,
     }

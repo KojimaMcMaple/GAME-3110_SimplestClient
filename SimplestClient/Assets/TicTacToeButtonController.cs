@@ -38,9 +38,17 @@ public class TicTacToeButtonController : MonoBehaviour
 
     public void SetSpace()
     {
+        if (game_manager_.IsTurn())
+        {
+            //[TODO]
+            //send msg to server, lock client
+            //let server decide next turn + result
+            //receive result, unlock client
+        }
         button_text_.text = game_manager_.GetPlayToken();
         button_.interactable = false;
         state_ = (GameEnum.TicTacToeButtonState)game_manager_.GetCurrPlayerId();
-        game_manager_.CheckGridCoord(grid_coord_);
+        game_manager_.CheckGridCoord(grid_coord_); //[OM] - offline mode 
+       
     }
 }
