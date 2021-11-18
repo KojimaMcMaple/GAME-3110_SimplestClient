@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
         create_toggle_.onValueChanged.AddListener(CreateToggleChanged);
         create_toggle_.isOn = false;
         join_gameroom_button_.onClick.AddListener(JoinGameRoomButtonPressed);
-        tttsquare_button_.onClick.AddListener(TTTSquareButtonPressed);
+        //tttsquare_button_.onClick.AddListener(TTTSquareButtonPressed);
         //join_gameroom_button_.gameObject.SetActive(false);
 
         ChangeState(GameEnum.State.LoginMenu);
