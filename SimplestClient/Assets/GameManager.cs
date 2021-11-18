@@ -223,7 +223,6 @@ public class GameManager : MonoBehaviour
                 ChangeState(GameEnum.State.TicTacToeWin);
             }
         }
-
         // CHECK WITH OTHER ROWS
         for (int i = 0; i < grid_size_.x; i++)
         {
@@ -235,7 +234,6 @@ public class GameManager : MonoBehaviour
                 ChangeState(GameEnum.State.TicTacToeWin);
             }
         }
-
         // CHECK DIAGONALLY
         if (coord.x == coord.y)
         {
@@ -250,7 +248,6 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-
         // CHECK REVERSE DIAGONALLY
         if (coord.x + coord.y == grid_size_.x - 1)
         {
@@ -265,7 +262,6 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-
         // CHECK IF IS TIE
         if (move_count_ == (Mathf.Pow(grid_size_.x, 2) - 1))
         {

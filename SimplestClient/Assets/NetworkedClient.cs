@@ -147,12 +147,15 @@ public class NetworkedClient : MonoBehaviour
                 game_manager_.SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
                 break;
             case NetworkEnum.ServerToClientSignifier.GameCurrPlayerWin:
+                Debug.Log(">>> GameCurrPlayerWin!");
                 game_manager_.ChangeState(GameEnum.State.TicTacToeWin);
                 break;
             case NetworkEnum.ServerToClientSignifier.GameOtherPlayerWin:
+                Debug.Log(">>> GameOtherPlayerWin!");
                 game_manager_.ChangeState(GameEnum.State.TicTacToeLose);
                 break;
             case NetworkEnum.ServerToClientSignifier.GameDraw:
+                Debug.Log(">>> GameOtherPlayerWin!");
                 game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
                 break;
             default:
