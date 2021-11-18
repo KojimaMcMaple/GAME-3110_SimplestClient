@@ -94,11 +94,6 @@ public class GameManager : MonoBehaviour
         ChangeState(GameEnum.State.LoginMenu);
     }
 
-    void Update()
-    {
-        
-    }
-
     public void SubmitButtonPressed()
     {
         string p = password_input_.text;
@@ -134,7 +129,7 @@ public class GameManager : MonoBehaviour
 
     public void TTTSquareButtonPressed()
     {
-        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.TTTPlay + "");
+        //networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.TTTPlay + "");
         //ChangeState(GameEnum.State.WaitingInQueueForOtherPlayer);
     }
 
@@ -171,7 +166,12 @@ public class GameManager : MonoBehaviour
             case GameEnum.State.TicTacToeWin:
                 GameOver();
                 game_over_panel_.SetActive(true);
-                game_over_text_.text = play_token_ + " Wins!";
+                game_over_text_.text = "You Win!";
+                break;
+            case GameEnum.State.TicTacToeLose:
+                GameOver();
+                game_over_panel_.SetActive(true);
+                game_over_text_.text = "Other Player Wins!";
                 break;
             case GameEnum.State.TicTacToeDraw:
                 GameOver();
@@ -201,6 +201,12 @@ public class GameManager : MonoBehaviour
     public void SetTurn(bool value)
     {
         is_turn_ = value;
+    }
+
+    public void SetTicTacToeButtonToken(int x, int y, string token)
+    {
+        button_list_[x, y].GetComponent<Text>().text = token;
+        button_list_[x, y].GetComponent<Button>().interactable = false;
     }
 
     public void CheckGridCoord(Vector2Int coord) //[OM]
@@ -309,6 +315,7 @@ public static class GameEnum
         TicTacToe,
         TicTacToeNextPlayer,
         TicTacToeWin,
+        TicTacToeLose,
         TicTacToeDraw,
     }
 

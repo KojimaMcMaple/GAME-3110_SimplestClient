@@ -10,6 +10,7 @@ public class TicTacToeButtonController : MonoBehaviour
     private Vector2Int grid_coord_;
     private GameEnum.TicTacToeButtonState state_;
     private GameManager game_manager_;
+    private NetworkedClient networked_client_;
 
     void Awake()
     {
@@ -19,6 +20,7 @@ public class TicTacToeButtonController : MonoBehaviour
         button_.onClick.AddListener(SetSpace);
 
         game_manager_ = FindObjectOfType<GameManager>();
+        networked_client_ = FindObjectOfType<NetworkedClient>();
     }
 
     public void SetGridCoord(int x, int y)
@@ -40,15 +42,13 @@ public class TicTacToeButtonController : MonoBehaviour
     {
         if (game_manager_.IsTurn())
         {
-            //[TODO]
-            //send msg to server, lock client
-            //let server decide next turn + result
-            //receive result, unlock client
+            networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.TTTPlay + ","+ grid_coord_.x + "," + grid_coord_.y);
+            game_manager_.SetTurn(false);
+            button_.interactable = false;
         }
-        button_text_.text = game_manager_.GetPlayToken();
-        button_.interactable = false;
-        state_ = (GameEnum.TicTacToeButtonState)game_manager_.GetCurrPlayerId();
-        game_manager_.CheckGridCoord(grid_coord_); //[OM] - offline mode 
-       
+        //button_text_.text = game_manager_.GetPlayToken();
+        //button_.interactable = false;
+        //state_ = (GameEnum.TicTacToeButtonState)game_manager_.GetCurrPlayerId();
+        //game_manager_.CheckGridCoord(grid_coord_); //[OM] - offline mode
     }
 }

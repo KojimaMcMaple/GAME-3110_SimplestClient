@@ -139,8 +139,21 @@ public class NetworkedClient : MonoBehaviour
                 Debug.Log(">>> GameWaitForTurn!");
                 game_manager_.SetTurn(false);
                 break;
-            case NetworkEnum.ServerToClientSignifier.OpponentPlay:
-                Debug.Log(">>> Opponent played!");
+            case NetworkEnum.ServerToClientSignifier.GameMarkSpace:
+                Debug.Log(">>> GameMarkSpace!");
+                string x = csv[1];
+                string y = csv[2];
+                string t = csv[3];
+                game_manager_.SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
+                break;
+            case NetworkEnum.ServerToClientSignifier.GameCurrPlayerWin:
+                game_manager_.ChangeState(GameEnum.State.TicTacToeWin);
+                break;
+            case NetworkEnum.ServerToClientSignifier.GameOtherPlayerWin:
+                game_manager_.ChangeState(GameEnum.State.TicTacToeLose);
+                break;
+            case NetworkEnum.ServerToClientSignifier.GameDraw:
+                game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
                 break;
             default:
                 break;
@@ -173,7 +186,7 @@ public static class NetworkEnum
         GameStart,
         GameDoTurn,
         GameWaitForTurn,
-        OpponentPlay,
+        GameMarkSpace,
         GameDraw,
         GameCurrPlayerWin,
         GameOtherPlayerWin
