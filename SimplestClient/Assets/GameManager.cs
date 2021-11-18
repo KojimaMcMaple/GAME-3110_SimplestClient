@@ -205,7 +205,7 @@ public class GameManager : MonoBehaviour
 
     public void SetTicTacToeButtonToken(int x, int y, string token)
     {
-        button_list_[x, y].GetComponent<Text>().text = token;
+        button_list_[x, y].transform.GetComponentInChildren<Text>().text = token;
         button_list_[x, y].GetComponent<Button>().interactable = false;
     }
 
