@@ -208,12 +208,18 @@ public class GameManager : MonoBehaviour
                 password_input_.gameObject.SetActive(true);
                 create_toggle_.gameObject.SetActive(true);
                 login_toggle_.gameObject.SetActive(true);
+                join_gameroom_button_.gameObject.SetActive(false);
                 break;
             case GameEnum.State.MainMenu:
                 login_panel_.SetActive(true);
                 game_panel_.SetActive(false);
                 game_over_panel_.SetActive(false);
                 chat_panel_.SetActive(false);
+                submit_button_.gameObject.SetActive(false);
+                username_input_.gameObject.SetActive(false);
+                password_input_.gameObject.SetActive(false);
+                create_toggle_.gameObject.SetActive(false);
+                login_toggle_.gameObject.SetActive(false);
                 join_gameroom_button_.gameObject.SetActive(true);
                 break;
             case GameEnum.State.WaitingInQueueForOtherPlayer:
