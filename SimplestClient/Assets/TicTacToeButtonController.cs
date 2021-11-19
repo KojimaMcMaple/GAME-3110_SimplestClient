@@ -38,6 +38,11 @@ public class TicTacToeButtonController : MonoBehaviour
         state_ = state;
     }
 
+    public void SetText(string text)
+    {
+        button_text_.text = text;
+    }
+
     public void SetSpace()
     {
         if (game_manager_.IsTurn())

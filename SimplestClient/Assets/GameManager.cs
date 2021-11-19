@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     GameObject game_panel_, game_over_panel_;
     Text game_over_text_;
     bool is_turn_ = false;
+    GameEnum.State last_state_;
 
     // CHAT VARS
     GameObject chat_panel_;
@@ -30,6 +31,9 @@ public class GameManager : MonoBehaviour
     List<Button> chat_prefix_button_list_;
     Dictionary<int, string> chat_prefix_dict_;
     InputField chat_input_field_;
+
+    // REPLAY VARS
+    Button replay_button_;
 
     //static GameObject instance;
     void Awake()
@@ -118,6 +122,9 @@ public class GameManager : MonoBehaviour
                         chat_prefix_button_list_[i].GetComponent<PrefixMsgButtonController>().SetMsgId(i);
                     }
                     break;
+                case "WatchReplayButton":
+                    replay_button_ = item.GetComponent<Button>();
+                    break;
                 default:
                     break;
             }
@@ -184,6 +191,11 @@ public class GameManager : MonoBehaviour
         //ChangeState(GameEnum.State.WaitingInQueueForOtherPlayer);
     }
 
+    public void ReplayButtonPressed()
+    {
+        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.DoReplay + "");
+    }
+
     public void ChangeState(GameEnum.State state)
     {
         //join_gameroom_button_.gameObject.SetActive(false);
@@ -244,6 +256,7 @@ public class GameManager : MonoBehaviour
                 break;
             case GameEnum.State.TicTacToeWin:
                 GameOver();
+                last_state_ = GameEnum.State.TicTacToeWin;
                 login_panel_.SetActive(false);
                 game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
@@ -252,6 +265,7 @@ public class GameManager : MonoBehaviour
                 break;
             case GameEnum.State.TicTacToeLose:
                 GameOver();
+                last_state_ = GameEnum.State.TicTacToeLose;
                 login_panel_.SetActive(false);
                 game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
@@ -260,11 +274,20 @@ public class GameManager : MonoBehaviour
                 break;
             case GameEnum.State.TicTacToeDraw:
                 GameOver();
+                last_state_ = GameEnum.State.TicTacToeDraw;
                 login_panel_.SetActive(false);
                 game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
                 chat_panel_.SetActive(true);
                 game_over_text_.text = "It's a draw!";
+                break;
+            case GameEnum.State.TicTacToeReplay:
+                ReplayLastGame();
+                game_over_text_.text = "Win Text";
+                login_panel_.SetActive(false);
+                game_panel_.SetActive(true);
+                game_over_panel_.SetActive(false);
+                chat_panel_.SetActive(true);
                 break;
             default:
                 break;
@@ -293,7 +316,7 @@ public class GameManager : MonoBehaviour
 
     public void SetTicTacToeButtonToken(int x, int y, string token)
     {
-        button_list_[x, y].transform.GetComponentInChildren<Text>().text = token;
+        button_list_[x, y].SetText(token);
         button_list_[x, y].GetComponent<Button>().interactable = false;
     }
 
@@ -383,9 +406,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void RestartGame()
+    void ReplayLastGame()
     {
-
+        for (int j = 0; j < grid_size_.y; j++)
+        {
+            for (int i = 0; i < grid_size_.x; i++)
+            {
+                button_list_[i, j].GetComponent<Button>().interactable = false;
+                button_list_[i, j].SetText("");
+            }
+        }
     }
 
     public string GetPrefixMsgFromId(int id)
@@ -396,6 +426,30 @@ public class GameManager : MonoBehaviour
     public void UpdateChat(string str)
     {
         chat_msg_text_.text = chat_msg_text_.text + "\n" + str;
+    }
+
+    public void SetTokenAtCoord(int x, int y, string token)
+    {
+        button_list_[x, y].SetText(token);
+    }
+
+    public GameEnum.State GetLastState()
+    {
+        return last_state_;
+    }
+
+    public void DoDelay(float time)
+    {
+        StartCoroutine(Delay(time));
+    }
+
+    /// <summary>
+    /// General delay function for level loading, show explosion before game over, etc.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator Delay(float time)
+    {
+        yield return new WaitForSeconds(time);
     }
 }
 
@@ -411,6 +465,7 @@ public static class GameEnum
         TicTacToeWin,
         TicTacToeLose,
         TicTacToeDraw,
+        TicTacToeReplay
     }
 
     public enum TicTacToeButtonState

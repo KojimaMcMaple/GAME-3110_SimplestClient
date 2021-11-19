@@ -112,64 +112,105 @@ public class NetworkedClient : MonoBehaviour
         switch (signifier)
         {
             case NetworkEnum.ServerToClientSignifier.LoginComplete:
-                Debug.Log(">>> Login done!");
-                game_manager_.ChangeState(GameEnum.State.MainMenu);
-                break;
-            case NetworkEnum.ServerToClientSignifier.LoginFailed:
-                Debug.Log(">>> Login FAILED!");
-                //game_manager_.ChangeState(GameEnum.State.LoginMenu);
-                break;
-            case NetworkEnum.ServerToClientSignifier.AccountCreationComplete:
-                Debug.Log(">>> Creating Account done!");
-                game_manager_.ChangeState(GameEnum.State.MainMenu);
-                break;
-            case NetworkEnum.ServerToClientSignifier.AccountCreationFailed:
-                Debug.Log(">>> Creating Account FAILED!");
-                //game_manager_.ChangeState(GameEnum.State.LoginMenu);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameStart:
-                Debug.Log(">>> GameStart!");
-                game_manager_.ChangeState(GameEnum.State.TicTacToe);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameDoTurn:
-                Debug.Log(">>> GameDoTurn!");
-                game_manager_.SetTurn(true);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameWaitForTurn:
-                Debug.Log(">>> GameWaitForTurn!");
-                game_manager_.SetTurn(false);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameMarkSpace:
-                Debug.Log(">>> GameMarkSpace!");
-                string x = csv[1];
-                string y = csv[2];
-                string t = csv[3];
-                game_manager_.SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameCurrPlayerWin:
-                Debug.Log(">>> GameCurrPlayerWin!");
-                game_manager_.ChangeState(GameEnum.State.TicTacToeWin);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameOtherPlayerWin:
-                Debug.Log(">>> GameOtherPlayerWin!");
-                game_manager_.ChangeState(GameEnum.State.TicTacToeLose);
-                break;
-            case NetworkEnum.ServerToClientSignifier.GameDraw:
-                Debug.Log(">>> GameOtherPlayerWin!");
-                game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
-                break;
-            case NetworkEnum.ServerToClientSignifier.ChatRelay:
-                Debug.Log(">>> ChatRelay!");
-                string str = csv[1];
-                if (csv.Length > 1)
                 {
-                    for (int i = 2; i < csv.Length; i++)
-                    {
-                        str = str + "," + csv[i];
-                    }
+                    Debug.Log(">>> Login done!");
+                    game_manager_.ChangeState(GameEnum.State.MainMenu);
+                    break;
                 }
-                game_manager_.UpdateChat(str);
-                break;
+            case NetworkEnum.ServerToClientSignifier.LoginFailed:
+                {
+                    Debug.Log(">>> Login FAILED!");
+                    //game_manager_.ChangeState(GameEnum.State.LoginMenu);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.AccountCreationComplete:
+                {
+                    Debug.Log(">>> Creating Account done!");
+                    game_manager_.ChangeState(GameEnum.State.MainMenu);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.AccountCreationFailed:
+                {
+                    Debug.Log(">>> Creating Account FAILED!");
+                    //game_manager_.ChangeState(GameEnum.State.LoginMenu);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameStart:
+                {
+                    Debug.Log(">>> GameStart!");
+                    game_manager_.ChangeState(GameEnum.State.TicTacToe);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameDoTurn:
+                {
+                    Debug.Log(">>> GameDoTurn!");
+                    game_manager_.SetTurn(true);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameWaitForTurn:
+                {
+                    Debug.Log(">>> GameWaitForTurn!");
+                    game_manager_.SetTurn(false);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameMarkSpace:
+                {
+                    Debug.Log(">>> GameMarkSpace!");
+                    string x = csv[1];
+                    string y = csv[2];
+                    string t = csv[3];
+                    game_manager_.SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameCurrPlayerWin:
+                {
+                    Debug.Log(">>> GameCurrPlayerWin!");
+                    game_manager_.ChangeState(GameEnum.State.TicTacToeWin);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameOtherPlayerWin:
+                {
+                    Debug.Log(">>> GameOtherPlayerWin!");
+                    game_manager_.ChangeState(GameEnum.State.TicTacToeLose);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameDraw:
+                {
+                    Debug.Log(">>> GameOtherPlayerWin!");
+                    game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.ChatRelay:
+                {
+                    Debug.Log(">>> ChatRelay!");
+                    string str = csv[1];
+                    if (csv.Length > 1)
+                    {
+                        for (int i = 2; i < csv.Length; i++)
+                        {
+                            str = str + "," + csv[i];
+                        }
+                    }
+                    game_manager_.UpdateChat(str);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.ReplayRelay:
+                {
+                    Debug.Log(">>> ReplayRelay!");
+                    string x = csv[1];
+                    string y = csv[2];
+                    string t = csv[3];
+                    game_manager_.SetTokenAtCoord(int.Parse(x), int.Parse(y), t);
+                    game_manager_.DoDelay(2.0f);
+                    SendMessageToHost(NetworkEnum.ClientToServerSignifier.NextReplayMove + "");
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.ReplayEnd:
+                {
+                    Debug.Log(">>> ReplayEnd!");
+                    game_manager_.ChangeState(game_manager_.GetLastState());
+                    break;
+                }
             default:
                 break;
         }
@@ -190,7 +231,9 @@ public static class NetworkEnum
         JoinQueueForGameRoom,
         GameWaitForFirstTurn,
         TTTPlay,
-        ChatSend
+        ChatSend,
+        DoReplay,
+        NextReplayMove
     }
 
     public enum ServerToClientSignifier
@@ -206,6 +249,8 @@ public static class NetworkEnum
         GameDraw,
         GameCurrPlayerWin,
         GameOtherPlayerWin,
-        ChatRelay
+        ChatRelay,
+        ReplayRelay,
+        ReplayEnd
     }
 }
