@@ -201,7 +201,6 @@ public class NetworkedClient : MonoBehaviour
                     string y = csv[2];
                     string t = csv[3];
                     game_manager_.SetTokenAtCoord(int.Parse(x), int.Parse(y), t);
-                    game_manager_.DoDelay(2.0f);
                     SendMessageToHost(NetworkEnum.ClientToServerSignifier.NextReplayMove + "");
                     break;
                 }

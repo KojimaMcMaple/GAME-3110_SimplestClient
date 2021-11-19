@@ -2837,7 +2837,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '> [2]: He who desires but acts not, breeds pestilence.'
+  m_Text: '> [0]: He who desires but acts not, breeds pestilence.'
 --- !u!222 &614136404
 CanvasRenderer:
   m_ObjectHideFlags: 0

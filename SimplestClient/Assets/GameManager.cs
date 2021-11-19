@@ -432,16 +432,12 @@ public class GameManager : MonoBehaviour
     public void SetTokenAtCoord(int x, int y, string token)
     {
         button_list_[x, y].SetText(token);
+        StartCoroutine(Delay(2.0f));
     }
 
     public GameEnum.State GetLastState()
     {
         return last_state_;
-    }
-
-    public void DoDelay(float time)
-    {
-        StartCoroutine(Delay(time));
     }
 
     /// <summary>
