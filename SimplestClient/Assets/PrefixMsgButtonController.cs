@@ -28,6 +28,6 @@ public class PrefixMsgButtonController : MonoBehaviour
 
     public void SendPrefixMsg()
     {
-        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.ChatSend + "," + GetPrefixMsgFromId(msg_id_));
+        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.ChatSend + "," + game_manager_.GetPrefixMsgFromId(msg_id_));
     }
 }
