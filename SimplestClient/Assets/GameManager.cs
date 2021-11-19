@@ -214,9 +214,9 @@ public class GameManager : MonoBehaviour
                 break;
             case GameEnum.State.TicTacToe:
                 //tttsquare_button_.gameObject.SetActive(true);
-                login_panel_.SetActive(false);
                 game_panel_.SetActive(true);
                 chat_panel_.SetActive(true);
+                login_panel_.SetActive(false);
                 break;
             case GameEnum.State.TicTacToeWin:
                 GameOver();
