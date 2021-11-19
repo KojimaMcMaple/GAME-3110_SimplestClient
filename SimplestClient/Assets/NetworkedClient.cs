@@ -158,6 +158,18 @@ public class NetworkedClient : MonoBehaviour
                 Debug.Log(">>> GameOtherPlayerWin!");
                 game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
                 break;
+            case NetworkEnum.ServerToClientSignifier.ChatRelay:
+                Debug.Log(">>> ChatRelay!");
+                string str = csv[1];
+                if (csv.Length > 1)
+                {
+                    for (int i = 2; i < csv.Length; i++)
+                    {
+                        str = str + "," + csv[i];
+                    }
+                }
+                game_manager_.UpdateChat(str);
+                break;
             default:
                 break;
         }
@@ -177,7 +189,8 @@ public static class NetworkEnum
         Login,
         JoinQueueForGameRoom,
         GameWaitForFirstTurn,
-        TTTPlay
+        TTTPlay,
+        ChatSend
     }
 
     public enum ServerToClientSignifier
@@ -192,6 +205,7 @@ public static class NetworkEnum
         GameMarkSpace,
         GameDraw,
         GameCurrPlayerWin,
-        GameOtherPlayerWin
+        GameOtherPlayerWin,
+        ChatRelay
     }
 }

@@ -5,10 +5,13 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    NetworkedClient networked_client_;
+
+    // LOGIN VARS
+    GameObject login_panel_;
     Button submit_button_, join_gameroom_button_;
     InputField username_input_, password_input_;
     Toggle create_toggle_, login_toggle_;
-    NetworkedClient networked_client_;
 
     // MAIN GAME VARS
     Button tttsquare_button_; //temp
@@ -21,6 +24,13 @@ public class GameManager : MonoBehaviour
     Text game_over_text_;
     bool is_turn_ = false;
 
+    // CHAT VARS
+    GameObject chat_panel_;
+    Text chat_msg_text_;
+    List<Button> chat_prefix_button_list_;
+    Dictionary<int, string> chat_prefix_dict_;
+    InputField chat_input_field_;
+
     //static GameObject instance;
     void Awake()
     {
@@ -30,6 +40,9 @@ public class GameManager : MonoBehaviour
         {
             switch (item.name)
             {
+                case "LoginPanel":
+                    login_panel_ = item;
+                    break;
                 case "UsernameInputField":
                     username_input_ = item.GetComponent<InputField>();
                     break;
@@ -78,6 +91,31 @@ public class GameManager : MonoBehaviour
                     break;
                 case "WinText":
                     game_over_text_ = item.GetComponent<Text>();
+                    break; 
+                case "ChatPanel":
+                    chat_panel_ = item;
+                    break;
+                case "ChatMsgText":
+                    chat_msg_text_ = item.GetComponent<Text>();
+                    break;
+                case "ChatInputField":
+                    chat_input_field_ = item.GetComponent<InputField>();
+                    break;
+                case "ChatPrefixMsgPanel":
+                    chat_prefix_button_list_ = new List<Button>();
+                    foreach (Transform child in item.transform)
+                    {
+                        chat_prefix_button_list_.Add(child.GetComponent<Button>());
+                    }
+                    chat_prefix_dict_ = new Dictionary<int, string>();
+                    chat_prefix_dict_.Add(0, "Let's settle this.");
+                    chat_prefix_dict_.Add(1, "You're pretty good.");
+                    chat_prefix_dict_.Add(2, "Make bridges, not walls.");
+                    chat_prefix_dict_.Add(3, "All things end. Even us.");
+                    for (int i = 0; i < chat_prefix_button_list_.Count; i++)
+                    {
+                        chat_prefix_button_list_[i].GetComponent<Text>().text = chat_prefix_dict_[i]; //[IMPROV] make enums?
+                    }
                     break;
                 default:
                     break;
@@ -92,6 +130,18 @@ public class GameManager : MonoBehaviour
         //join_gameroom_button_.gameObject.SetActive(false);
 
         ChangeState(GameEnum.State.LoginMenu);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (chat_input_field_.text != "")
+            {
+                networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.ChatSend + "," + chat_input_field_.text);
+                chat_input_field_.text = "";
+            }
+        }
     }
 
     public void SubmitButtonPressed()
@@ -141,12 +191,15 @@ public class GameManager : MonoBehaviour
         password_input_.gameObject.SetActive(false);
         create_toggle_.gameObject.SetActive(false);
         login_toggle_.gameObject.SetActive(false);
+        login_panel_.SetActive(false);
         //tttsquare_button_.gameObject.SetActive(false);
         game_panel_.SetActive(false);
         game_over_panel_.SetActive(false);
+        chat_panel_.SetActive(false);
         switch (state)
         {
             case GameEnum.State.LoginMenu:
+                login_panel_.SetActive(true);
                 submit_button_.gameObject.SetActive(true);
                 username_input_.gameObject.SetActive(true);
                 password_input_.gameObject.SetActive(true);
@@ -161,7 +214,9 @@ public class GameManager : MonoBehaviour
                 break;
             case GameEnum.State.TicTacToe:
                 //tttsquare_button_.gameObject.SetActive(true);
+                login_panel_.SetActive(false);
                 game_panel_.SetActive(true);
+                chat_panel_.SetActive(true);
                 break;
             case GameEnum.State.TicTacToeWin:
                 GameOver();
@@ -298,6 +353,16 @@ public class GameManager : MonoBehaviour
     void RestartGame()
     {
 
+    }
+
+    public string GetPrefixMsgFromId(int id)
+    {
+        return chat_prefix_dict_[id];
+    }
+
+    public void UpdateChat(string str)
+    {
+        chat_msg_text_.text = chat_msg_text_.text + "\n" + str;
     }
 }
 
