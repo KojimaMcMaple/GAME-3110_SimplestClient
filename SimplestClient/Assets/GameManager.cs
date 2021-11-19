@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
                     for (int i = 0; i < chat_prefix_button_list_.Count; i++)
                     {
                         chat_prefix_button_list_[i].transform.GetComponentInChildren<Text>().text = chat_prefix_dict_[i]; //[IMPROV] make enums?
+                        chat_prefix_button_list_[i].GetComponent<PrefixMsgButtonController>().SetMsgId(i);
                     }
                     break;
                 default:
