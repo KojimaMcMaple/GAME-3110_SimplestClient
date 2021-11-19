@@ -136,6 +136,7 @@ public class GameManager : MonoBehaviour
         join_gameroom_button_.onClick.AddListener(JoinGameRoomButtonPressed);
         //tttsquare_button_.onClick.AddListener(TTTSquareButtonPressed);
         //join_gameroom_button_.gameObject.SetActive(false);
+        replay_button_.onClick.AddListener(ReplayButtonPressed);
 
         ChangeState(GameEnum.State.LoginMenu);
     }
