@@ -224,7 +224,16 @@ public class GameManager : MonoBehaviour
                 join_gameroom_button_.gameObject.SetActive(true);
                 break;
             case GameEnum.State.WaitingInQueueForOtherPlayer:
-                
+                login_panel_.SetActive(true);
+                game_panel_.SetActive(false);
+                game_over_panel_.SetActive(false);
+                chat_panel_.SetActive(false);
+                submit_button_.gameObject.SetActive(false);
+                username_input_.gameObject.SetActive(false);
+                password_input_.gameObject.SetActive(false);
+                create_toggle_.gameObject.SetActive(false);
+                login_toggle_.gameObject.SetActive(false);
+                join_gameroom_button_.gameObject.SetActive(false);
                 break;
             case GameEnum.State.TicTacToe:
                 //tttsquare_button_.gameObject.SetActive(true);
