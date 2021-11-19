@@ -185,21 +185,24 @@ public class GameManager : MonoBehaviour
 
     public void ChangeState(GameEnum.State state)
     {
-        join_gameroom_button_.gameObject.SetActive(false);
-        submit_button_.gameObject.SetActive(false);
-        username_input_.gameObject.SetActive(false);
-        password_input_.gameObject.SetActive(false);
-        create_toggle_.gameObject.SetActive(false);
-        login_toggle_.gameObject.SetActive(false);
-        login_panel_.SetActive(false);
-        //tttsquare_button_.gameObject.SetActive(false);
-        game_panel_.SetActive(false);
-        game_over_panel_.SetActive(false);
-        chat_panel_.SetActive(false);
+        //join_gameroom_button_.gameObject.SetActive(false);
+        //submit_button_.gameObject.SetActive(false);
+        //username_input_.gameObject.SetActive(false);
+        //password_input_.gameObject.SetActive(false);
+        //create_toggle_.gameObject.SetActive(false);
+        //login_toggle_.gameObject.SetActive(false);
+        //login_panel_.SetActive(false);
+        ////tttsquare_button_.gameObject.SetActive(false);
+        //game_panel_.SetActive(false);
+        //game_over_panel_.SetActive(false);
+        //chat_panel_.SetActive(false);
         switch (state)
         {
             case GameEnum.State.LoginMenu:
                 login_panel_.SetActive(true);
+                game_panel_.SetActive(false);
+                game_over_panel_.SetActive(false);
+                chat_panel_.SetActive(false);
                 submit_button_.gameObject.SetActive(true);
                 username_input_.gameObject.SetActive(true);
                 password_input_.gameObject.SetActive(true);
@@ -207,6 +210,10 @@ public class GameManager : MonoBehaviour
                 login_toggle_.gameObject.SetActive(true);
                 break;
             case GameEnum.State.MainMenu:
+                login_panel_.SetActive(true);
+                game_panel_.SetActive(false);
+                game_over_panel_.SetActive(false);
+                chat_panel_.SetActive(false);
                 join_gameroom_button_.gameObject.SetActive(true);
                 break;
             case GameEnum.State.WaitingInQueueForOtherPlayer:
@@ -214,23 +221,33 @@ public class GameManager : MonoBehaviour
                 break;
             case GameEnum.State.TicTacToe:
                 //tttsquare_button_.gameObject.SetActive(true);
-                game_panel_.SetActive(true);
-                chat_panel_.SetActive(true);
                 login_panel_.SetActive(false);
+                game_panel_.SetActive(true);
+                game_over_panel_.SetActive(false);
+                chat_panel_.SetActive(true);
                 break;
             case GameEnum.State.TicTacToeWin:
                 GameOver();
+                login_panel_.SetActive(false);
+                game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
+                chat_panel_.SetActive(true);
                 game_over_text_.text = "You Win!";
                 break;
             case GameEnum.State.TicTacToeLose:
                 GameOver();
+                login_panel_.SetActive(false);
+                game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
+                chat_panel_.SetActive(true);
                 game_over_text_.text = "Other Player Wins!";
                 break;
             case GameEnum.State.TicTacToeDraw:
                 GameOver();
+                login_panel_.SetActive(false);
+                game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
+                chat_panel_.SetActive(true);
                 game_over_text_.text = "It's a draw!";
                 break;
             default:
