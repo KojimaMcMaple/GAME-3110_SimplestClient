@@ -17,7 +17,8 @@ public class GameManager : MonoBehaviour
     Button tttsquare_button_; //temp
     Vector2Int grid_size_ = new Vector2Int(3, 3); //(x,y) (col,row)
     TicTacToeButtonController[,] button_list_;
-    private string play_token_ = "X";
+    private string player_1_token_ = "x";
+    private string player_2_token_ = "o";
     private int player_id_ = 1;
     int move_count_ = 0;
     GameObject game_panel_, game_over_panel_;
@@ -34,6 +35,9 @@ public class GameManager : MonoBehaviour
 
     // REPLAY VARS
     Button replay_button_;
+
+    // OBSERVER VARS
+    Button observer_join_button_;
 
     //static GameObject instance;
     void Awake()
@@ -125,6 +129,9 @@ public class GameManager : MonoBehaviour
                 case "WatchReplayButton":
                     replay_button_ = item.GetComponent<Button>();
                     break;
+                case "ObserverJoinGameRoomButton":
+                    observer_join_button_ = item.GetComponent<Button>();
+                    break;
                 default:
                     break;
             }
@@ -137,6 +144,7 @@ public class GameManager : MonoBehaviour
         //tttsquare_button_.onClick.AddListener(TTTSquareButtonPressed);
         //join_gameroom_button_.gameObject.SetActive(false);
         replay_button_.onClick.AddListener(ReplayButtonPressed);
+        observer_join_button_.onClick.AddListener(ObserverJoinPressed);
 
         ChangeState(GameEnum.State.LoginMenu);
     }
@@ -182,7 +190,7 @@ public class GameManager : MonoBehaviour
 
     public void JoinGameRoomButtonPressed()
     {
-        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.JoinQueueForGameRoom+"");
+        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.JoinQueueForGameRoom + "");
         ChangeState(GameEnum.State.WaitingInQueueForOtherPlayer);
     }
 
@@ -195,6 +203,12 @@ public class GameManager : MonoBehaviour
     public void ReplayButtonPressed()
     {
         networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.DoReplay + "");
+    }
+
+    public void ObserverJoinPressed()
+    {
+        networked_client_.SendMessageToHost(NetworkEnum.ClientToServerSignifier.JoinQueueForGameRoomAsObserver + "");
+        ChangeState(GameEnum.State.WaitingInQueueForOtherPlayer);
     }
 
     public void ChangeState(GameEnum.State state)
@@ -223,6 +237,7 @@ public class GameManager : MonoBehaviour
                 create_toggle_.gameObject.SetActive(true);
                 login_toggle_.gameObject.SetActive(true);
                 join_gameroom_button_.gameObject.SetActive(false);
+                observer_join_button_.gameObject.SetActive(false);
                 break;
             case GameEnum.State.MainMenu:
                 login_panel_.SetActive(true);
@@ -235,6 +250,7 @@ public class GameManager : MonoBehaviour
                 create_toggle_.gameObject.SetActive(false);
                 login_toggle_.gameObject.SetActive(false);
                 join_gameroom_button_.gameObject.SetActive(true);
+                observer_join_button_.gameObject.SetActive(true);
                 break;
             case GameEnum.State.WaitingInQueueForOtherPlayer:
                 login_panel_.SetActive(true);
@@ -247,6 +263,7 @@ public class GameManager : MonoBehaviour
                 create_toggle_.gameObject.SetActive(false);
                 login_toggle_.gameObject.SetActive(false);
                 join_gameroom_button_.gameObject.SetActive(false);
+                observer_join_button_.gameObject.SetActive(false);
                 break;
             case GameEnum.State.TicTacToe:
                 //tttsquare_button_.gameObject.SetActive(true);
@@ -262,7 +279,7 @@ public class GameManager : MonoBehaviour
                 game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
                 chat_panel_.SetActive(true);
-                game_over_text_.text = "You Win!";
+                game_over_text_.text = player_1_token_ + " Wins!";
                 break;
             case GameEnum.State.TicTacToeLose:
                 GameOver();
@@ -271,7 +288,7 @@ public class GameManager : MonoBehaviour
                 game_panel_.SetActive(true);
                 game_over_panel_.SetActive(true);
                 chat_panel_.SetActive(true);
-                game_over_text_.text = "Other Player Wins!";
+                game_over_text_.text = player_2_token_ + " Wins!";
                 break;
             case GameEnum.State.TicTacToeDraw:
                 GameOver();
@@ -295,9 +312,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public string GetPlayToken()
+    public string GetPlayer1Token()
     {
-        return play_token_;
+        return player_1_token_;
+    }
+
+    public void SetPlayer1Token(string value)
+    {
+        player_1_token_ = value;
+    }
+
+    public void SetPlayer2Token(string value)
+    {
+        player_2_token_ = value;
     }
 
     public int GetCurrPlayerId()
@@ -387,12 +414,23 @@ public class GameManager : MonoBehaviour
         if (player_id_ == 1)
         {
             player_id_ = 2;
-            play_token_ = "O";
+            player_1_token_ = "O";
         }
         else if (player_id_ == 2)
         {
             player_id_ = 1;
-            play_token_ = "X";
+            player_1_token_ = "X";
+        }
+    }
+
+    void SetAllGridButtonsInteractable(bool value)
+    {
+        for (int j = 0; j < grid_size_.y; j++)
+        {
+            for (int i = 0; i < grid_size_.x; i++)
+            {
+                button_list_[i, j].GetComponent<Button>().interactable = value;
+            }
         }
     }
 
@@ -461,7 +499,8 @@ public static class GameEnum
         TicTacToeWin,
         TicTacToeLose,
         TicTacToeDraw,
-        TicTacToeReplay
+        TicTacToeReplay,
+        TicTacToeObserve
     }
 
     public enum TicTacToeButtonState

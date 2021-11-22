@@ -138,7 +138,21 @@ public class NetworkedClient : MonoBehaviour
             case NetworkEnum.ServerToClientSignifier.GameStart:
                 {
                     Debug.Log(">>> GameStart!");
+                    string t1 = csv[1];
+                    string t2 = csv[2];
+                    game_manager_.SetPlayer1Token(t1);
+                    game_manager_.SetPlayer2Token(t2);
                     game_manager_.ChangeState(GameEnum.State.TicTacToe);
+                    break;
+                }
+            case NetworkEnum.ServerToClientSignifier.GameStartForObserver:
+                {
+                    Debug.Log(">>> GameStartForObserver!");
+                    string t1 = csv[1];
+                    string t2 = csv[2];
+                    game_manager_.SetPlayer1Token(t1);
+                    game_manager_.SetPlayer2Token(t2);
+                    game_manager_.ChangeState(GameEnum.State.TicTacToeObserve);
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameDoTurn:
@@ -228,6 +242,7 @@ public static class NetworkEnum
         CreateAccount = 1,
         Login,
         JoinQueueForGameRoom,
+        JoinQueueForGameRoomAsObserver,
         GameWaitForFirstTurn,
         TTTPlay,
         ChatSend,
@@ -242,6 +257,7 @@ public static class NetworkEnum
         AccountCreationComplete,
         AccountCreationFailed,
         GameStart,
+        GameStartForObserver,
         GameDoTurn,
         GameWaitForTurn,
         GameMarkSpace,
