@@ -271,6 +271,14 @@ public class GameManager : MonoBehaviour
                 game_panel_.SetActive(true);
                 game_over_panel_.SetActive(false);
                 chat_panel_.SetActive(true);
+                SetAllGridButtonsInteractable(true);
+                break;
+            case GameEnum.State.TicTacToeObserve:
+                login_panel_.SetActive(false);
+                game_panel_.SetActive(true);
+                game_over_panel_.SetActive(false);
+                chat_panel_.SetActive(true);
+                SetAllGridButtonsInteractable(false);
                 break;
             case GameEnum.State.TicTacToeWin:
                 GameOver();
@@ -436,13 +444,7 @@ public class GameManager : MonoBehaviour
 
     void GameOver()
     {
-        for (int j = 0; j < grid_size_.y; j++)
-        {
-            for (int i = 0; i < grid_size_.x; i++)
-            {
-                button_list_[i, j].GetComponent<Button>().interactable = false;
-            }
-        }
+        SetAllGridButtonsInteractable(false);
     }
 
     void ReplayLastGame()
