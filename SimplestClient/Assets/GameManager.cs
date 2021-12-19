@@ -160,7 +160,7 @@ public class GameManager : MonoBehaviour
         NetworkedClient.OnChatRelay += DoChatRelay;
         NetworkedClient.OnRecordingTransferDataEnd += DoRecordingTransferDataEnd;
 
-    ChangeState(GameEnum.State.LoginMenu);
+        ChangeState(GameEnum.State.LoginMenu);
 
         recording_ = new GameRecording(-1,-1,-1,-1);
     }
@@ -499,6 +499,11 @@ public class GameManager : MonoBehaviour
     {
         ChangeState(GameEnum.State.TicTacToeReplay);
         recording_.Deserialize(data);
+        StartCoroutine(PlayCurrRecording());
+    }
+
+    public IEnumerator PlayCurrRecording()
+    {
         System.DateTime prev_date = recording_.start_datetime;
         System.TimeSpan interval;
         foreach (GameRecording.GameMove move in recording_.game_move_queue)
@@ -507,7 +512,8 @@ public class GameManager : MonoBehaviour
             Debug.Log("> date1 = " + move.datetime);
             Debug.Log("> date2 = " + prev_date);
             Debug.Log(">>> interval = " + interval);
-            StartCoroutine(Delay((float)interval.TotalSeconds));
+            Debug.Log(">>> (float)interval.TotalSeconds = " + (float)interval.TotalSeconds);
+            yield return new WaitForSeconds((float)interval.TotalSeconds);
             string token = "V";
             if (move.turn == GameEnum.PlayerTurn.kPlayer2)
             {
@@ -516,6 +522,7 @@ public class GameManager : MonoBehaviour
             SetTokenAtCoord(move.grid_coord_x, move.grid_coord_y, token);
             prev_date = move.datetime;
         }
+        ChangeState(GetLastState());
     }
 
     /// <summary>
