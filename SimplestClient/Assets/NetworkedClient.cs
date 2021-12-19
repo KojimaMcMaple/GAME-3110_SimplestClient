@@ -36,7 +36,7 @@ public class NetworkedClient : MonoBehaviour
 
     void Start()
     {
-        game_manager_ = FindObjectOfType<GameManager>();
+        //game_manager_ = FindObjectOfType<GameManager>();
         Connect();
     }
 
