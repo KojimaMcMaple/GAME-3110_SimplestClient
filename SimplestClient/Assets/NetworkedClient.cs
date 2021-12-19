@@ -18,7 +18,21 @@ public class NetworkedClient : MonoBehaviour
     string ip_address_ = "192.168.1.128"; //CHECK IF IP IS CORRECT FIRST AND FOREMOST
     Queue<string> incoming_record_data_;
 
-    GameManager game_manager_;
+    //GameManager game_manager_;
+    public delegate void NetworkedEvent(string data);
+    public static event NetworkedEvent OnLoginComplete;
+    public static event NetworkedEvent OnAccountCreationComplete;
+    public static event NetworkedEvent OnGameStart;
+    public static event NetworkedEvent OnGameStartForObserver;
+    public static event NetworkedEvent OnGameDoTurn;
+    public static event NetworkedEvent OnGameWaitForTurn;
+    public static event NetworkedEvent OnGameMarkSpace;
+    public static event NetworkedEvent OnGameCurrPlayerWin;
+    public static event NetworkedEvent OnGameOtherPlayerWin;
+    public static event NetworkedEvent OnGameDraw;
+    public static event NetworkedEvent OnChatRelay;
+    public delegate void NetworkedQueuedEvent(Queue<string> data);
+    public static event NetworkedQueuedEvent OnRecordingTransferDataEnd;
 
     void Start()
     {
@@ -115,7 +129,8 @@ public class NetworkedClient : MonoBehaviour
             case NetworkEnum.ServerToClientSignifier.LoginComplete:
                 {
                     Debug.Log(">>> Login done!");
-                    game_manager_.ChangeState(GameEnum.State.MainMenu);
+                    //game_manager_.ChangeState(GameEnum.State.MainMenu);
+                    if (OnLoginComplete != null) { OnLoginComplete(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.LoginFailed:
@@ -127,7 +142,8 @@ public class NetworkedClient : MonoBehaviour
             case NetworkEnum.ServerToClientSignifier.AccountCreationComplete:
                 {
                     Debug.Log(">>> Creating Account done!");
-                    game_manager_.ChangeState(GameEnum.State.MainMenu);
+                    //game_manager_.ChangeState(GameEnum.State.MainMenu);
+                    if (OnAccountCreationComplete != null) { OnAccountCreationComplete(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.AccountCreationFailed:
@@ -139,60 +155,68 @@ public class NetworkedClient : MonoBehaviour
             case NetworkEnum.ServerToClientSignifier.GameStart:
                 {
                     Debug.Log(">>> GameStart!");
-                    string t1 = csv[1];
-                    string t2 = csv[2];
-                    game_manager_.SetPlayer1Token(t1);
-                    game_manager_.SetPlayer2Token(t2);
-                    game_manager_.ChangeState(GameEnum.State.TicTacToe);
+                    //string t1 = csv[1];
+                    //string t2 = csv[2];
+                    //game_manager_.SetPlayer1Token(t1);
+                    //game_manager_.SetPlayer2Token(t2);
+                    //game_manager_.ChangeState(GameEnum.State.TicTacToe);
+                    if (OnGameStart != null) { OnGameStart(csv[1] + "," + csv[2]); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameStartForObserver:
                 {
                     Debug.Log(">>> GameStartForObserver!");
-                    string t1 = csv[1];
-                    string t2 = csv[2];
-                    game_manager_.SetPlayer1Token(t1);
-                    game_manager_.SetPlayer2Token(t2);
-                    game_manager_.ChangeState(GameEnum.State.TicTacToeObserve);
+                    //string t1 = csv[1];
+                    //string t2 = csv[2];
+                    //game_manager_.SetPlayer1Token(t1);
+                    //game_manager_.SetPlayer2Token(t2);
+                    //game_manager_.ChangeState(GameEnum.State.TicTacToeObserve);
+                    if (OnGameStartForObserver != null) { OnGameStartForObserver(csv[1] + "," + csv[2]); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameDoTurn:
                 {
-                    Debug.Log(">>> GameDoTurn!");
-                    game_manager_.SetTurn(true);
+                    Debug.Log(">>> GameDoTurn!"); 
+                    //game_manager_.SetTurn(true);
+                    if (OnGameDoTurn != null) { OnGameDoTurn(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameWaitForTurn:
                 {
-                    Debug.Log(">>> GameWaitForTurn!");
-                    game_manager_.SetTurn(false);
+                    Debug.Log(">>> GameWaitForTurn!"); 
+                    //game_manager_.SetTurn(false);
+                    if (OnGameWaitForTurn != null) { OnGameWaitForTurn(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameMarkSpace:
                 {
                     Debug.Log(">>> GameMarkSpace!");
-                    string x = csv[1];
-                    string y = csv[2];
-                    string t = csv[3];
-                    game_manager_.SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
+                    //string x = csv[1];
+                    //string y = csv[2];
+                    //string t = csv[3];
+                    //game_manager_.SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
+                    if (OnGameMarkSpace != null) { OnGameMarkSpace(csv[1] + "," + csv[2] + "," + csv[3]); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameCurrPlayerWin:
                 {
                     Debug.Log(">>> GameCurrPlayerWin!");
-                    game_manager_.ChangeState(GameEnum.State.TicTacToeWin);
+                    //game_manager_.ChangeState(GameEnum.State.TicTacToeWin);
+                    if (OnGameCurrPlayerWin != null) { OnGameCurrPlayerWin(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameOtherPlayerWin:
                 {
                     Debug.Log(">>> GameOtherPlayerWin!");
-                    game_manager_.ChangeState(GameEnum.State.TicTacToeLose);
+                    //game_manager_.ChangeState(GameEnum.State.TicTacToeLose);
+                    if (OnGameOtherPlayerWin != null) { OnGameOtherPlayerWin(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.GameDraw:
                 {
                     Debug.Log(">>> GameOtherPlayerWin!");
-                    game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
+                    //game_manager_.ChangeState(GameEnum.State.TicTacToeDraw);
+                    if (OnGameDraw != null) { OnGameDraw(""); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.ChatRelay:
@@ -206,7 +230,8 @@ public class NetworkedClient : MonoBehaviour
                             str = str + "," + csv[i];
                         }
                     }
-                    game_manager_.UpdateChat(str);
+                    //game_manager_.UpdateChat(str);
+                    if (OnChatRelay != null) { OnChatRelay(str); } //Broadcast event
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.RecordingTransferDataStart:
@@ -232,7 +257,8 @@ public class NetworkedClient : MonoBehaviour
             case NetworkEnum.ServerToClientSignifier.RecordingTransferDataEnd:
                 {
                     Debug.Log(">>> RecordingTransferDataEnd!");
-                    game_manager_.LoadGameRecording(incoming_record_data_);
+                    //game_manager_.LoadGameRecording(incoming_record_data_);
+                    if (OnRecordingTransferDataEnd != null) { OnRecordingTransferDataEnd(incoming_record_data_); } //Broadcast event
                     break;
                 }
             //case NetworkEnum.ServerToClientSignifier.ReplayRelay:
@@ -308,13 +334,13 @@ public class GameRecording
             player_id_1 + "," + player_id_2 + "," +
             grid_size_x + "," + grid_size_y + "," +
             start_datetime.Year.ToString() + "," + start_datetime.Month.ToString() + "," + start_datetime.Day.ToString() + "," +
-            start_datetime.Hour.ToString() + "," + start_datetime.Minute.ToString());
+            start_datetime.Hour.ToString() + "," + start_datetime.Minute.ToString() + "," + start_datetime.Second.ToString());
         foreach (GameMove item in game_move_queue)
         {
             data.Enqueue((int)GameEnum.RecordDataId.kMoveDataId + "," +
                 (int)item.turn + "," + item.grid_coord_x + "," + item.grid_coord_y + "," +
             item.datetime.Year.ToString() + "," + item.datetime.Month.ToString() + "," + item.datetime.Day.ToString() + "," +
-            item.datetime.Hour.ToString() + "," + item.datetime.Minute.ToString());
+            item.datetime.Hour.ToString() + "," + item.datetime.Minute.ToString() + "," + item.datetime.Second.ToString());
         }
         return data;
     }
@@ -323,7 +349,6 @@ public class GameRecording
     {
         foreach (string line in data)
         {
-            Debug.Log(">>> line = " +line);
             string[] csv = line.Split(',');
             GameEnum.RecordDataId record_data_id = (GameEnum.RecordDataId)int.Parse(csv[0]);
             switch (record_data_id)
@@ -333,11 +358,11 @@ public class GameRecording
                     player_id_2 = int.Parse(csv[2]);
                     grid_size_x = int.Parse(csv[3]);
                     grid_size_y = int.Parse(csv[4]);
-                    start_datetime = new System.DateTime(int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]), int.Parse(csv[8]), int.Parse(csv[9]), 0);
+                    start_datetime = new System.DateTime(int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]), int.Parse(csv[8]), int.Parse(csv[9]), int.Parse(csv[10]));
                     break;
                 case GameEnum.RecordDataId.kMoveDataId:
                     game_move_queue.Enqueue(new GameMove((GameEnum.PlayerTurn)int.Parse(csv[1]), int.Parse(csv[2]), int.Parse(csv[3]),
-                        new System.DateTime(int.Parse(csv[4]), int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]), int.Parse(csv[8]), 0)));
+                        new System.DateTime(int.Parse(csv[4]), int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]), int.Parse(csv[8]), int.Parse(csv[9]))));
                     break;
             }
         }

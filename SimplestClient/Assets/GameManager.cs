@@ -147,7 +147,20 @@ public class GameManager : MonoBehaviour
         replay_button_.onClick.AddListener(ReplayButtonPressed);
         observer_join_button_.onClick.AddListener(ObserverJoinPressed);
 
-        ChangeState(GameEnum.State.LoginMenu);
+        NetworkedClient.OnLoginComplete += DoLoginComplete;
+        NetworkedClient.OnAccountCreationComplete += DoAccountCreationComplete;
+        NetworkedClient.OnGameStart += DoGameStart;
+        NetworkedClient.OnGameStartForObserver += DoGameStartForObserver;
+        NetworkedClient.OnGameDoTurn += DoGameDoTurn;
+        NetworkedClient.OnGameWaitForTurn += DoGameWaitForTurn;
+        NetworkedClient.OnGameMarkSpace += DoGameMarkSpace;
+        NetworkedClient.OnGameCurrPlayerWin += DoGameCurrPlayerWin;
+        NetworkedClient.OnGameOtherPlayerWin += DoGameOtherPlayerWin;
+        NetworkedClient.OnGameDraw += DoGameDraw;
+        NetworkedClient.OnChatRelay += DoChatRelay;
+        NetworkedClient.OnRecordingTransferDataEnd += DoRecordingTransferDataEnd;
+
+    ChangeState(GameEnum.State.LoginMenu);
 
         recording_ = new GameRecording(-1,-1,-1,-1);
     }
@@ -491,6 +504,8 @@ public class GameManager : MonoBehaviour
         foreach (GameRecording.GameMove move in recording_.game_move_queue)
         {
             interval = move.datetime - prev_date;
+            Debug.Log("> date1 = " + move.datetime);
+            Debug.Log("> date2 = " + prev_date);
             Debug.Log(">>> interval = " + interval);
             StartCoroutine(Delay((float)interval.TotalSeconds));
             string token = "V";
@@ -510,6 +525,70 @@ public class GameManager : MonoBehaviour
     private IEnumerator Delay(float time)
     {
         yield return new WaitForSeconds(time);
+    }
+    
+    // EVENTS
+    private void DoLoginComplete(string data)
+    {
+        ChangeState(GameEnum.State.MainMenu);
+    }
+    private void DoAccountCreationComplete(string data)
+    {
+        ChangeState(GameEnum.State.MainMenu);
+    }
+    private void DoGameStart(string data)
+    {
+        string[] csv = data.Split(',');
+        string t1 = csv[0];
+        string t2 = csv[1];
+        SetPlayer1Token(t1);
+        SetPlayer2Token(t2);
+        ChangeState(GameEnum.State.TicTacToe);
+    }
+    private void DoGameStartForObserver(string data)
+    {
+        string[] csv = data.Split(',');
+        string t1 = csv[0];
+        string t2 = csv[1];
+        SetPlayer1Token(t1);
+        SetPlayer2Token(t2);
+        ChangeState(GameEnum.State.TicTacToeObserve);
+    }
+    private void DoGameDoTurn(string data)
+    {
+        SetTurn(true);
+    }
+    private void DoGameWaitForTurn(string data)
+    {
+        SetTurn(false);
+    }
+    private void DoGameMarkSpace(string data)
+    {
+        string[] csv = data.Split(',');
+        string x = csv[0];
+        string y = csv[1];
+        string t = csv[2];
+        SetTicTacToeButtonToken(int.Parse(x), int.Parse(y), t);
+    }
+    private void DoGameCurrPlayerWin(string data)
+    {
+        ChangeState(GameEnum.State.TicTacToeWin);
+    }
+    private void DoGameOtherPlayerWin(string data)
+    {
+        ChangeState(GameEnum.State.TicTacToeLose);
+    }
+    private void DoGameDraw(string data)
+    {
+        ChangeState(GameEnum.State.TicTacToeDraw);
+    }
+    private void DoChatRelay(string data)
+    {
+        UpdateChat(data);
+    }
+    private void DoRecordingTransferDataEnd(Queue<string> data)
+    {
+        LoadGameRecording(data);
     }
 }
 
