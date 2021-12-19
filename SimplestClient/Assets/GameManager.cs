@@ -484,17 +484,19 @@ public class GameManager : MonoBehaviour
 
     public void LoadGameRecording(Queue<string> data)
     {
+        ChangeState(GameEnum.State.TicTacToeReplay);
         recording_.Deserialize(data);
         System.DateTime prev_date = recording_.start_datetime;
         System.TimeSpan interval;
         foreach (GameRecording.GameMove move in recording_.game_move_queue)
         {
             interval = move.datetime - prev_date;
+            Debug.Log(">>> interval = " + interval);
             StartCoroutine(Delay((float)interval.TotalSeconds));
-            string token = "X";
+            string token = "V";
             if (move.turn == GameEnum.PlayerTurn.kPlayer2)
             {
-                token = "O";
+                token = "G";
             }
             SetTokenAtCoord(move.grid_coord_x, move.grid_coord_y, token);
             prev_date = move.datetime;
