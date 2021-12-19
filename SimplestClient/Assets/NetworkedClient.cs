@@ -282,6 +282,7 @@ public class GameRecording
         this.grid_size_x = grid_size_x;
         this.grid_size_y = grid_size_y;
         start_datetime = System.DateTime.Now;
+        game_move_queue = new Queue<GameMove>();
     }
 
     public void AddGameMoveWithCurrTime(GameEnum.PlayerTurn turn, int grid_coord_x, int grid_coord_y)
