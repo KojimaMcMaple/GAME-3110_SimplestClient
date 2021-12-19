@@ -216,7 +216,12 @@ public class NetworkedClient : MonoBehaviour
                 }
             case NetworkEnum.ServerToClientSignifier.RecordingTransferData:
                 {
-                    incoming_record_data_.Enqueue(msg);
+                    string str = "";
+                    for (int i = 1; i < csv.Length; i++)
+                    {
+                        str = str + "," + csv[i];
+                    }
+                    incoming_record_data_.Enqueue(str);
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.RecordingTransferDataEnd:
@@ -312,6 +317,7 @@ public class GameRecording
     {
         foreach (string line in data)
         {
+            Debug.Log(">>> line = " +line);
             string[] csv = line.Split(',');
             GameEnum.RecordDataId record_data_id = (GameEnum.RecordDataId)int.Parse(csv[0]);
             switch (record_data_id)
