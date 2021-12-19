@@ -16,6 +16,7 @@ public class NetworkedClient : MonoBehaviour
     bool isConnected = false;
     int ourClientID;
     string ip_address_ = "192.168.1.128"; //CHECK IF IP IS CORRECT FIRST AND FOREMOST
+    Queue<string> incoming_record_data_;
 
     GameManager game_manager_;
 
@@ -104,7 +105,7 @@ public class NetworkedClient : MonoBehaviour
         NetworkTransport.Send(hostID, connectionID, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
     }
 
-    private void ProcessReceivedMsg(string msg, int id)
+    private void ProcessReceivedMsg(string msg, int id) //[TODO] decouple game logic to something - WATCH LAB
     {
         Debug.Log("msg received = " + msg + ".  connection id = " + id);
         string[] csv = msg.Split(',');
@@ -208,22 +209,37 @@ public class NetworkedClient : MonoBehaviour
                     game_manager_.UpdateChat(str);
                     break;
                 }
-            case NetworkEnum.ServerToClientSignifier.ReplayRelay:
+            case NetworkEnum.ServerToClientSignifier.RecordingTransferDataStart:
                 {
-                    Debug.Log(">>> ReplayRelay!");
-                    string x = csv[1];
-                    string y = csv[2];
-                    string t = csv[3];
-                    game_manager_.SetTokenAtCoord(int.Parse(x), int.Parse(y), t);
-                    SendMessageToHost(NetworkEnum.ClientToServerSignifier.NextReplayMove + "");
+                    incoming_record_data_ = new Queue<string>();
                     break;
                 }
-            case NetworkEnum.ServerToClientSignifier.ReplayEnd:
+            case NetworkEnum.ServerToClientSignifier.RecordingTransferData:
                 {
-                    Debug.Log(">>> ReplayEnd!");
-                    game_manager_.ChangeState(game_manager_.GetLastState());
+                    incoming_record_data_.Enqueue(msg);
                     break;
                 }
+            case NetworkEnum.ServerToClientSignifier.RecordingTransferDataEnd:
+                {
+                    game_manager_.LoadGameRecording(incoming_record_data_);
+                    break;
+                }
+            //case NetworkEnum.ServerToClientSignifier.ReplayRelay:
+            //    {
+            //        Debug.Log(">>> ReplayRelay!");
+            //        string x = csv[1];
+            //        string y = csv[2];
+            //        string t = csv[3];
+            //        game_manager_.SetTokenAtCoord(int.Parse(x), int.Parse(y), t); //[TODO] queue for replay
+            //        SendMessageToHost(NetworkEnum.ClientToServerSignifier.NextReplayMove + "");
+            //        break;
+            //    }
+            //case NetworkEnum.ServerToClientSignifier.ReplayEnd:
+            //    {
+            //        Debug.Log(">>> ReplayEnd!");
+            //        game_manager_.ChangeState(game_manager_.GetLastState());
+            //        break;
+            //    }
             default:
                 break;
         }
@@ -232,6 +248,86 @@ public class NetworkedClient : MonoBehaviour
     public bool IsConnected()
     {
         return isConnected;
+    }
+}
+
+
+public class GameRecording
+{
+    public int player_id_1, player_id_2;
+    public int grid_size_x, grid_size_y;
+    public System.DateTime start_datetime;
+    public Queue<GameMove> game_move_queue;
+
+    public struct GameMove
+    {
+        public GameEnum.PlayerTurn turn;
+        public int grid_coord_x;
+        public int grid_coord_y;
+        public System.DateTime datetime;
+
+        public GameMove(GameEnum.PlayerTurn turn, int grid_coord_x, int grid_coord_y, System.DateTime datetime)
+        {
+            this.turn = turn;
+            this.grid_coord_x = grid_coord_x;
+            this.grid_coord_y = grid_coord_y;
+            this.datetime = datetime;
+        }
+    }
+    
+    public GameRecording(int id_1, int id_2, int grid_size_x, int grid_size_y)
+    {
+        player_id_1 = id_1;
+        player_id_2 = id_2;
+        this.grid_size_x = grid_size_x;
+        this.grid_size_y = grid_size_y;
+        start_datetime = System.DateTime.Now;
+    }
+
+    public void AddGameMoveWithCurrTime(GameEnum.PlayerTurn turn, int grid_coord_x, int grid_coord_y)
+    {
+        game_move_queue.Enqueue(new GameMove(turn, grid_coord_x, grid_coord_y, System.DateTime.Now));
+    }
+
+    public Queue<string> Serialize()
+    {
+        Queue<string> data = new Queue<string>();
+        data.Enqueue((int)GameEnum.RecordDataId.kRoomSettingId + "," +
+            player_id_1 + "," + player_id_2 + "," +
+            grid_size_x + "," + grid_size_y + "," +
+            start_datetime.Year.ToString() + "," + start_datetime.Month.ToString() + "," + start_datetime.Day.ToString() + "," +
+            start_datetime.Hour.ToString() + "," + start_datetime.Minute.ToString());
+        foreach (GameMove item in game_move_queue)
+        {
+            data.Enqueue((int)GameEnum.RecordDataId.kMoveDataId + "," +
+                (int)item.turn + "," + item.grid_coord_x + "," + item.grid_coord_y + "," +
+            item.datetime.Year.ToString() + "," + item.datetime.Month.ToString() + "," + item.datetime.Day.ToString() + "," +
+            item.datetime.Hour.ToString() + "," + item.datetime.Minute.ToString());
+        }
+        return data;
+    }
+
+    public void Deserialize(Queue<string> data)
+    {
+        foreach (string line in data)
+        {
+            string[] csv = line.Split(',');
+            GameEnum.RecordDataId record_data_id = (GameEnum.RecordDataId)int.Parse(csv[0]);
+            switch (record_data_id)
+            {
+                case GameEnum.RecordDataId.kRoomSettingId:
+                    player_id_1 = int.Parse(csv[1]);
+                    player_id_2 = int.Parse(csv[2]);
+                    grid_size_x = int.Parse(csv[3]);
+                    grid_size_y = int.Parse(csv[4]);
+                    start_datetime = new System.DateTime(int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]), int.Parse(csv[8]), int.Parse(csv[9]), 0);
+                    break;
+                case GameEnum.RecordDataId.kMoveDataId:
+                    game_move_queue.Enqueue(new GameMove((GameEnum.PlayerTurn)int.Parse(csv[1]), int.Parse(csv[2]), int.Parse(csv[3]),
+                        new System.DateTime(int.Parse(csv[4]), int.Parse(csv[5]), int.Parse(csv[6]), int.Parse(csv[7]), int.Parse(csv[8]), 0)));
+                    break;
+            }
+        }
     }
 }
 
@@ -247,7 +343,10 @@ public static class NetworkEnum
         TTTPlay,
         ChatSend,
         DoReplay,
-        NextReplayMove
+        NextReplayMove,
+        RecordingTransferDataStart = 100,
+        RecordingTransferData = 101,
+        RecordingTransferDataEnd = 102
     }
 
     public enum ServerToClientSignifier
@@ -266,6 +365,9 @@ public static class NetworkEnum
         GameOtherPlayerWin,
         ChatRelay,
         ReplayRelay,
-        ReplayEnd
+        ReplayEnd,
+        RecordingTransferDataStart = 100,
+        RecordingTransferData = 101,
+        RecordingTransferDataEnd = 102
     }
 }

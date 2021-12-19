@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     // REPLAY VARS
     Button replay_button_;
+    GameRecording recording_;
 
     // OBSERVER VARS
     Button observer_join_button_;
@@ -147,6 +148,8 @@ public class GameManager : MonoBehaviour
         observer_join_button_.onClick.AddListener(ObserverJoinPressed);
 
         ChangeState(GameEnum.State.LoginMenu);
+
+        recording_ = new GameRecording(-1,-1,-1,-1);
     }
 
     private void Update()
@@ -479,6 +482,25 @@ public class GameManager : MonoBehaviour
         return last_state_;
     }
 
+    public void LoadGameRecording(Queue<string> data)
+    {
+        recording_.Deserialize(data);
+        System.DateTime prev_date = recording_.start_datetime;
+        System.TimeSpan interval;
+        foreach (GameRecording.GameMove move in recording_.game_move_queue)
+        {
+            interval = move.datetime - prev_date;
+            StartCoroutine(Delay((float)interval.TotalSeconds));
+            string token = "X";
+            if (move.turn == GameEnum.PlayerTurn.kPlayer2)
+            {
+                token = "O";
+            }
+            SetTokenAtCoord(move.grid_coord_x, move.grid_coord_y, token);
+            prev_date = move.datetime;
+        }
+    }
+
     /// <summary>
     /// General delay function for level loading, show explosion before game over, etc.
     /// </summary>
@@ -510,5 +532,17 @@ public static class GameEnum
         kBlank,
         kPlayer1,
         kPlayer2
+    }
+
+    public enum PlayerTurn
+    {
+        kPlayer1,
+        kPlayer2
+    }
+
+    public enum RecordDataId
+    {
+        kRoomSettingId,
+        kMoveDataId
     }
 }
