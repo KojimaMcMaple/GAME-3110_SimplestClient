@@ -211,21 +211,27 @@ public class NetworkedClient : MonoBehaviour
                 }
             case NetworkEnum.ServerToClientSignifier.RecordingTransferDataStart:
                 {
+                    Debug.Log(">>> RecordingTransferDataStart!");
                     incoming_record_data_ = new Queue<string>();
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.RecordingTransferData:
                 {
-                    string str = "";
-                    for (int i = 1; i < csv.Length; i++)
+                    Debug.Log(">>> RecordingTransferData!");
+                    string str = csv[1];
+                    if (csv.Length > 1)
                     {
-                        str = str + "," + csv[i];
+                        for (int i = 2; i < csv.Length; i++)
+                        {
+                            str = str + "," + csv[i];
+                        }
                     }
                     incoming_record_data_.Enqueue(str);
                     break;
                 }
             case NetworkEnum.ServerToClientSignifier.RecordingTransferDataEnd:
                 {
+                    Debug.Log(">>> RecordingTransferDataEnd!");
                     game_manager_.LoadGameRecording(incoming_record_data_);
                     break;
                 }
